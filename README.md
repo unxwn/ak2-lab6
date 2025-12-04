@@ -40,25 +40,19 @@ Lab 6: Extend the two-module design (`hello1`, `hello2`) from Lab 5 with BUG_ON 
 Set environment:
 
 ```
-
 source setup_env.sh
-
 ```
 
 Build modules:
 
 ```
-
 make
-
 ```
 
 You should get:
 
 ```
-
 ls -l hello1.ko hello2.ko
-
 ```
 
 If you follow appendix-style Makefile, you will also have `hello1.ko.unstripped` and `hello2.ko.unstripped` for analysis.
@@ -68,32 +62,26 @@ If you follow appendix-style Makefile, you will also have `hello1.ko.unstripped`
 Copy modules into BusyBox rootfs:
 
 ```
-
 cp hello1.ko hello2.ko ~/repos/busybox/_install/
-
 ```
 
 Rebuild initramfs:
 
 ```
-
 cd ~/repos/busybox/_install
 find . | cpio -H newc -o > ../../rootfs.cpio
 cd ../..
 gzip -f rootfs.cpio
-
 ```
 
 ## Boot QEMU
 
 ```
-
 qemu-system-arm \
--kernel ~/repos/linux-stable/_install/boot/zImage \
+-kernel ~/repos/busybox/_install/boot/zImage \
 -initrd ~/repos/rootfs.cpio.gz \
 -machine virt -nographic -m 512 \
 -append "root=/dev/ram0 rw console=ttyAMA0,115200 mem=512M"
-
 ```
 
 ## Test Scenarios
@@ -101,14 +89,12 @@ qemu-system-arm \
 ### 1. Normal load/unload (no errors)
 
 ```
-
 insmod hello1.ko
 insmod hello2.ko count=3
 cat /sys/module/hello2/parameters/count
 rmmod hello2
 rmmod hello1
 dmesg | tail -20
-
 ```
 
 Expected:
@@ -120,11 +106,9 @@ Expected:
 ### 2. Simulated kmalloc failure
 
 ```
-
 insmod hello1.ko
 insmod hello2.ko count=7
 dmesg | tail -30
-
 ```
 
 Expected:
@@ -142,19 +126,15 @@ rmmod hello1
 dmesg | tail -20
 
 ```
-
 Expected:
 - Timing output for successful calls only.
 
 ### 3. BUG_ON on invalid parameter
-
 ```
-
 insmod hello1.ko
 insmod hello2.ko count=15
 
 # System should oops/panic; inspect dmesg after reboot
-
 ```
 
 Expected:
